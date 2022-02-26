@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./styles/style.css">
+    <script type="text/javascript" src="./dist/truffle-contract.min.js"></script>
+    <script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script>
+    <title>Voting</title>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <div class="connection">
+            <div class="connection__status">
+                <p id="connection-status">Вы не подключены к MetaMask</p>
+                <p id="account"></p>
+                <p id="chain"></p>
+            </div>
+            <button id="connect-btn" class="connection__btn" disabled>Подключиться</button>
+        </div>
+        <div class="participating visually-hidden">
+            <div class="participating__status">
+                <p id="participating-status">Вы не являетесь кандидатом</p>
+                <p id="votes"></p>
+            </div>
+            <button id="participate-btn" class="participating__btn">Участвовать</button>
+        </div>
+        <div class="candidates-list">
+
+        </div>
+    </div>
+</div>
+
+<script src="js/bundle.js"></script>
+
+<template id="candidate-template">
+    <div class="candidate">
+        <div class="candidate__info">
+            <p class="candidate__name"></p>
+            <p class="candidate__address"></p>
+        </div>
+        <div class="candidate__votes">
+            <p class="candidate__votes-count"></p>
+            <button class="candidate__vote-btn">Голосовать</button>
+        </div>
+    </div>
+</template>
+
+</body>
+</html>

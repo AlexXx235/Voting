@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "nodemon --exec http-server ./src --watch ./src/js"
+  },
+  "dependencies": {
+    "@metamask/detect-provider": "^1.2.0",
+    "@openzeppelin/contracts": "^4.4.2",
+    "@truffle/contract": "^4.4.10",
+    "@truffle/hdwallet-provider": "^2.0.3",
+    "web3": "file:../../../../Users/AlexX/AppData/Roaming/npm/node_modules/web3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}

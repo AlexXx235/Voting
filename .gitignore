@@ -1,0 +1,5 @@
+.secret
+*.docx
+node_modules
+build
+.idea
