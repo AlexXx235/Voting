@@ -101,3 +101,66 @@ button {
 
 .candidate__vote-btn {
 }
+
+.transactions {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.transactions__header {
+    width: 100%;
+    /*height: 20px;*/
+    padding: 8px 10px;
+
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+    background-color: #FCFCFC;
+}
+
+.triangle {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid black;
+    margin: 0 8px;
+}
+
+.triangle_opened {
+    transform: rotate(180deg);
+}
+
+.transactions__title {
+
+}
+
+.transactions__list {
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+}
+
+.transactions__list_opened {
+    height: auto;
+    max-height: 250px;
+    visibility: visible;
+}
+
+.transaction {
+    display: flex;
+    padding: 10px;
+
+    background-color: #FCFCFC;
+}
+
+.transaction__status-img {
+    display: flex;
+    align-items: center;
+    padding: 0 20px 0 10px;
+}

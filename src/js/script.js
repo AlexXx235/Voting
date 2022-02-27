@@ -7,7 +7,7 @@ const $ = sel => { return document.querySelector(sel); };
 
 // Contract data
 contract = {
-    address: '0x03f9f2Db3c1dB39d7298247Ec4F0d78fCAD81d57',
+    address: '0x411936A94CD05E8A16742D2524e221b15182e860',
     json: require('../../build/contracts/Voting.json'),
 }
 const Voting = TruffleContract(contract.json);
@@ -37,6 +37,14 @@ detectEthereumProvider()
 async function startApp() {
     // Get the Voting contract instance
     instance =  await Voting.at(contract.address);
+    instance.Vote().on('data', event => {
+        console.log("Vote event");
+        console.log(event);
+    });
+    instance.Join().on('data', event => {
+        console.log("Join event");
+        console.log(event);
+    });
     $('#participate-btn').addEventListener('click', participate);
 
     // We do not need the account to call view functions, so
@@ -84,16 +92,42 @@ function getChain() {
 
 // Contract interactions
 
-async function participate(e) {
-    const tx = await instance.participate({ from: currentAccount });
-    console.log(tx);
+function callMethod(contractMethod, ...args) {
+    console.log(contractMethod);
+    for (let arg of args) {
+        console.log(arg);
+    }
+
+    const transactionRecord = transactionRecordTmp.cloneNode(true);
+    transactionRecord.firstElementChild.appendChild(
+        transactionLoadingTmp.cloneNode(true)
+    );
+
+    contractMethod(...args)
+        .once('transactionHash', hash => {
+            transactionRecord.querySelector('.transaction__status').innerText = "Pending...";
+            transactionRecord.querySelector('.transaction__hash').innerText = `Hash: ${hash}`;
+            $('.transactions__list').appendChild(transactionRecord);
+        })
+        .once('error', console.error)
+        .then(receipt => {
+            console.log(receipt);
+            transactionRecord.querySelector('.transaction__status-img').innerHTML = ''
+            transactionRecord.querySelector('.transaction__status-img').appendChild(
+                checkSignTmp.cloneNode(true)
+            );
+            transactionRecord.querySelector('.transaction__status').innerText = "Success";
+        });
 }
 
-async function vote(e) {
+async function participate(e) {
+    callMethod(instance.participate, {from: currentAccount})
+}
+
+function vote(e) {
     const address = e.currentTarget.closest('.candidate').dataset.address;
     console.log(address);
-    const tx = await instance.vote(address, {from: currentAccount});
-    console.log(tx);
+    callMethod(instance.vote, address, {from: currentAccount});
 }
 
 async function getCandidates() {
@@ -175,5 +209,7 @@ function handleProviderMessage(msg) {
     console.log(msg);
 }
 
-
-
+// Templates
+const transactionLoadingTmp = $('#transaction-loading').content.firstElementChild;
+const checkSignTmp = $('#check-sign').content.firstElementChild;
+const transactionRecordTmp = $('#transaction-record').content.firstElementChild;

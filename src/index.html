@@ -6,13 +6,21 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="./styles/style.css">
+    <link rel="stylesheet" href="./styles/animations.css">
     <script type="text/javascript" src="./dist/truffle-contract.min.js"></script>
     <script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script>
     <title>Voting</title>
 </head>
 <body>
 <div class="container">
-    <div class="content">
+    <main class="content">
+        <div class="transactions">
+            <div class="transactions__header">
+                <div class="triangle"></div>
+                <p class="transactions__title">Список текущих транзакций</p>
+            </div>
+            <div class="transactions__list"></div>
+        </div>
         <div class="connection">
             <div class="connection__status">
                 <p id="connection-status">Вы не подключены к MetaMask</p>
@@ -31,10 +39,8 @@
         <div class="candidates-list">
 
         </div>
-    </div>
+    </main>
 </div>
-
-<script src="js/bundle.js"></script>
 
 <template id="candidate-template">
     <div class="candidate">
@@ -49,5 +55,27 @@
     </div>
 </template>
 
+<template id="transaction-record">
+    <div class="transaction">
+        <div class="transaction__status-img"></div>
+        <div class="transaction__status-info">
+            <p class="transaction__status"></p>
+            <p class="transaction__hash"></p>
+        </div>
+    </div>
+</template>
+
+<template id="transaction-loading">
+    <span class="cssload-loader"><span class="cssload-loader-inner"></span></span>
+</template>
+
+<template id="check-sign">
+    <div class="check-sign-wrap">
+        <div class="check-sign"></div>
+    </div>
+</template>
+
+<script src="js/front.js"></script>
+<script src="js/bundle.js"></script>
 </body>
 </html>
