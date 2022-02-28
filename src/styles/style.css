@@ -149,6 +149,7 @@ button {
 .transactions__list_opened {
     height: auto;
     max-height: 250px;
+    overflow-y: auto;
     visibility: visible;
 }
 

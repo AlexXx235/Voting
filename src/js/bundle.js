@@ -10381,12 +10381,12 @@ module.exports={
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x411936A94CD05E8A16742D2524e221b15182e860",
-      "transactionHash": "0x568b8b3826a3af7a710b9e03676d4082f9b2094ce7022952e2f0d352ef166977"
+      "address": "0x6095A97fA3545C9FbCc1A9170A0CD2bE5214Efad",
+      "transactionHash": "0xdf288e1bcb95f0079f6a3513715cdaf2b24397262cf023620b0ee5b562156052"
     }
   },
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-02-27T18:39:52.577Z",
+  "updatedAt": "2022-02-28T15:43:06.808Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
@@ -10445,16 +10445,58 @@ module.exports={
   }
 }
 },{}],2:[function(require,module,exports){
-// 1. Detect if metamask installed
-// 2. Set event handlers
-// 3. Request accounts
-// 4. Set other action handlers
+module.exports = class TxRecordHandler {
+    constructor(html) {
+        this.html = html;
+    }
+
+    setTitle(title) {
+        this.html.querySelector('.transaction__title').innerText = title;
+    }
+
+    setHash(hash) {
+        this.html.querySelector('.transaction__hash').innerText = `Hash: ${hash}`;
+    }
+
+    setPendingStatus(txLoadingTmp) {
+        this.html.querySelector('.transaction__status-img').innerHTML = '';
+        this.html.querySelector('.transaction__status-img').appendChild(
+            txLoadingTmp.cloneNode(true)
+        );
+
+        this.html.querySelector('.transaction__status').innerText = "Pending...";
+
+        this.count = 0;
+        this.timer = setInterval(() =>{
+            this.html.querySelector('.transaction__timer').innerText = this.count;
+            ++this.count;
+        }, 1000);
+    }
+
+    setSuccessStatus(txSuccessTmp) {
+        this.html.querySelector('.transaction__status-img').innerHTML = ''
+        this.html.querySelector('.transaction__status-img').appendChild(
+            txSuccessTmp.cloneNode(true)
+        );
+
+        this.html.querySelector('.transaction__status').innerText = "Success";
+
+        clearInterval(this.timer);
+    }
+}
+},{}],3:[function(require,module,exports){
+const TxRecordHandler = require('./TxRecordHandler.js');
 
 const $ = sel => { return document.querySelector(sel); };
 
+// Templates
+const transactionLoadingTmp = $('#transaction-loading').content.firstElementChild;
+const checkSignTmp = $('#check-sign').content.firstElementChild;
+const transactionRecordTmp = $('#transaction-record').content.firstElementChild;
+
 // Contract data
-contract = {
-    address: '0x411936A94CD05E8A16742D2524e221b15182e860',
+const contract = {
+    address: '0x6095A97fA3545C9FbCc1A9170A0CD2bE5214Efad',
     json: require('../../build/contracts/Voting.json'),
 }
 const Voting = TruffleContract(contract.json);
@@ -10539,51 +10581,54 @@ function getChain() {
 
 // Contract interactions
 
-function callMethod(contractMethod, ...args) {
-    console.log(contractMethod);
-    for (let arg of args) {
-        console.log(arg);
-    }
+async function participate(e) {
+    const txRecord = new TxRecordHandler(transactionRecordTmp.cloneNode(true));
+    txRecord.setTitle(`${currentAccount} joined the voting!`);
 
-    const transactionRecord = transactionRecordTmp.cloneNode(true);
-    transactionRecord.firstElementChild.appendChild(
-        transactionLoadingTmp.cloneNode(true)
-    );
-
-    contractMethod(...args)
+    instance.participate({from: currentAccount})
         .once('transactionHash', hash => {
-            transactionRecord.querySelector('.transaction__status').innerText = "Pending...";
-            transactionRecord.querySelector('.transaction__hash').innerText = `Hash: ${hash}`;
-            $('.transactions__list').appendChild(transactionRecord);
+            txRecord.setHash(hash)
+            txRecord.setPendingStatus(transactionLoadingTmp);
+
+            // Add tx to tx list
+            $('.transactions__list').prepend(txRecord.html);
         })
         .once('error', console.error)
         .then(receipt => {
-            console.log(receipt);
-            transactionRecord.querySelector('.transaction__status-img').innerHTML = ''
-            transactionRecord.querySelector('.transaction__status-img').appendChild(
-                checkSignTmp.cloneNode(true)
-            );
-            transactionRecord.querySelector('.transaction__status').innerText = "Success";
+            txRecord.setSuccessStatus(checkSignTmp);
+            setParticipatingStatus();
+            getCandidates();
         });
 }
 
-async function participate(e) {
-    callMethod(instance.participate, {from: currentAccount})
-}
-
-function vote(e) {
+async function vote(e) {
     const address = e.currentTarget.closest('.candidate').dataset.address;
-    console.log(address);
-    callMethod(instance.vote, address, {from: currentAccount});
+
+    const txRecord = new TxRecordHandler(transactionRecordTmp.cloneNode(true));
+    txRecord.setTitle(`${currentAccount} voted for ${address}`);
+
+    instance.vote(address, {from: currentAccount})
+        .once('transactionHash', hash => {
+            txRecord.setHash(hash)
+            txRecord.setPendingStatus(transactionLoadingTmp);
+
+            // Add tx to tx list
+            $('.transactions__list').prepend(txRecord.html);
+        })
+        .once('error', console.error)
+        .then(receipt => {
+            txRecord.setSuccessStatus(checkSignTmp);
+            getCandidates();
+        });
 }
 
 async function getCandidates() {
     const candidates = await instance.getAllCandidates();
-    console.log(candidates);
+    const candidatesList = $('.candidates-list');
+    candidatesList.innerHTML = '';
     if (candidates.length > 0) {
         for (const candidate of candidates) {
             const candidateRow = $('#candidate-template').content.firstElementChild.cloneNode(true);
-            console.log(candidateRow);
 
             candidateRow.dataset.address = candidate.addr;
 
@@ -10592,7 +10637,7 @@ async function getCandidates() {
 
             candidateRow.querySelector('button').addEventListener('click', vote);
 
-            $('.candidates-list').insertAdjacentElement('beforeend', candidateRow);
+            candidatesList.appendChild(candidateRow);
         }
     } else {
         console.log('No candidates');
@@ -10656,8 +10701,4 @@ function handleProviderMessage(msg) {
     console.log(msg);
 }
 
-// Templates
-const transactionLoadingTmp = $('#transaction-loading').content.firstElementChild;
-const checkSignTmp = $('#check-sign').content.firstElementChild;
-const transactionRecordTmp = $('#transaction-record').content.firstElementChild;
-},{"../../build/contracts/Voting.json":1}]},{},[2]);
+},{"../../build/contracts/Voting.json":1,"./TxRecordHandler.js":2}]},{},[3]);

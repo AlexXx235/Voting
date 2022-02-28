@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "nodemon --exec http-server ./src --watch ./src/js"
+    "start": "nodemon --verbose --exec \"browserify src/js/script.js > src/js/bundle.js\" --watch ./src/js/script.js"
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
