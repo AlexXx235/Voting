@@ -14,27 +14,44 @@
 <body>
 <div class="container">
     <main class="content">
-        <div class="transactions">
-            <div class="transactions__header">
-                <div class="triangle"></div>
-                <p class="transactions__title">Список текущих транзакций</p>
+        <div class="errors">
+
+        </div>
+        <div class="dropdown">
+            <div class="dropdown__header">
+                <div class="right-triangle"></div>
+                <p class="dropdown__title">Transactions</p>
             </div>
-            <div class="transactions__list"></div>
+            <div id="transactions-list" class="dropdown__list">
+
+            </div>
+        </div>
+        <div class="dropdown">
+            <div class="dropdown__header">
+                <div class="right-triangle"></div>
+                <p class="dropdown__title">Events</p>
+            </div>
+            <div id="events-list" class="dropdown__list">
+
+            </div>
         </div>
         <div class="connection">
             <div class="connection__status">
-                <p id="connection-status">Вы не подключены к MetaMask</p>
+                <p id="connection-status">You are not connected to MetaMask</p>
                 <p id="account"></p>
                 <p id="chain"></p>
             </div>
-            <button id="connect-btn" class="connection__btn" disabled>Подключиться</button>
+            <button id="connect-btn" class="connection__btn" disabled>Connect</button>
         </div>
         <div class="participating visually-hidden">
             <div class="participating__status">
-                <p id="participating-status">Вы не являетесь кандидатом</p>
+                <p id="participating-status">You are not a candidate</p>
                 <p id="votes"></p>
             </div>
-            <button id="participate-btn" class="participating__btn">Участвовать</button>
+            <button id="participate-btn" class="participating__btn" disabled>Join</button>
+        </div>
+        <div class="voting-status">
+            <p id="voted" class="voting-status__voted"></p>
         </div>
         <div class="candidates-list">
 
@@ -50,7 +67,7 @@
         </div>
         <div class="candidate__votes">
             <p class="candidate__votes-count"></p>
-            <button class="candidate__vote-btn">Голосовать</button>
+            <button class="candidate__vote-btn">Vote</button>
         </div>
     </div>
 </template>
@@ -74,6 +91,26 @@
 <template id="check-sign">
     <div class="check-sign-wrap">
         <div class="check-sign"></div>
+    </div>
+</template>
+
+<template id="error-tmp">
+    <div class="error">
+        <p class="error__msg"></p>
+    </div>
+</template>
+
+<template id="red-cross-tmp">
+    <div class="red-cross-wrap">
+        <div id="red-cross-1" class="red-cross"></div>
+        <div id="red-cross-2" class="red-cross"></div>
+    </div>
+</template>
+
+<template id="event-tmp">
+    <div class="event">
+        <p class="event__name"></p>
+        <p class="event__data"></p>
     </div>
 </template>
 

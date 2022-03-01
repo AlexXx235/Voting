@@ -36,4 +36,15 @@ module.exports = class TxRecordHandler {
 
         clearInterval(this.timer);
     }
+
+    setFailedStatus(txFailTmp) {
+        this.html.querySelector('.transaction__status-img').innerHTML = ''
+        this.html.querySelector('.transaction__status-img').appendChild(
+            txFailTmp.cloneNode(true)
+        );
+
+        this.html.querySelector('.transaction__status').innerText = "Fail";
+
+        clearInterval(this.timer);
+    }
 }

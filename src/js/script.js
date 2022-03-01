@@ -1,3 +1,10 @@
+// Faced errors
+// 4001 (EIP-1193) - User denied the transaction (clicked deny in popup or closed it)
+// -32603 (JSON-RPC) - Internal JSON-RPC error (mostly possible gas estimation failed)
+// how to get the reason from require???
+// -32000 - -32099 Reserved for implementation-defined errors
+// here I can find the reason
+
 const TxRecordHandler = require('./TxRecordHandler.js');
 
 const $ = sel => { return document.querySelector(sel); };
@@ -6,10 +13,13 @@ const $ = sel => { return document.querySelector(sel); };
 const transactionLoadingTmp = $('#transaction-loading').content.firstElementChild;
 const checkSignTmp = $('#check-sign').content.firstElementChild;
 const transactionRecordTmp = $('#transaction-record').content.firstElementChild;
+const errorRecordTmp = $('#error-tmp').content.firstElementChild;
+const redCrossTmp = $('#red-cross-tmp').content.firstElementChild;
+const eventTmp = $('#event-tmp').content.firstElementChild;
 
 // Contract data
 const contract = {
-    address: '0x6095A97fA3545C9FbCc1A9170A0CD2bE5214Efad',
+    address: '0x69ABab51e6f9910a35F9203466220c122b698dcF',
     json: require('../../build/contracts/Voting.json'),
 }
 const Voting = TruffleContract(contract.json);
@@ -38,15 +48,11 @@ detectEthereumProvider()
 
 async function startApp() {
     // Get the Voting contract instance
-    instance =  await Voting.at(contract.address);
-    instance.Vote().on('data', event => {
-        console.log("Vote event");
-        console.log(event);
-    });
-    instance.Join().on('data', event => {
-        console.log("Join event");
-        console.log(event);
-    });
+    instance = await Voting.at(contract.address);
+
+    instance.Vote().on('data', showEvent);
+    instance.Join().on('data', showEvent);
+
     $('#participate-btn').addEventListener('click', participate);
 
     // We do not need the account to call view functions, so
@@ -74,8 +80,6 @@ function connect() {
         .then(handleAccountsChanged)
         .catch((err) => {
             if (err.code === 4001) {
-                // EIP-1193 userRejectedRequest error
-                // If this happens, the user rejected the connection request.
                 console.log('Please connect to MetaMask.');
             } else {
                 console.error(err);
@@ -94,28 +98,36 @@ function getChain() {
 
 // Contract interactions
 
-async function participate(e) {
+function participate(e) {
     const txRecord = new TxRecordHandler(transactionRecordTmp.cloneNode(true));
     txRecord.setTitle(`${currentAccount} joined the voting!`);
 
     instance.participate({from: currentAccount})
         .once('transactionHash', hash => {
-            txRecord.setHash(hash)
+            txRecord.setHash(hash);
             txRecord.setPendingStatus(transactionLoadingTmp);
 
             // Add tx to tx list
-            $('.transactions__list').prepend(txRecord.html);
+            $('#transactions-list').prepend(txRecord.html);
         })
-        .once('error', console.error)
         .then(receipt => {
             txRecord.setSuccessStatus(checkSignTmp);
             setParticipatingStatus();
             getCandidates();
+        })
+        .catch(error => {
+            console.log('here');
+            txRecord.setFailedStatus(redCrossTmp);
+            handleError(error);
         });
 }
 
-async function vote(e) {
+function vote(e) {
     const address = e.currentTarget.closest('.candidate').dataset.address;
+    if (address.toLowerCase() === currentAccount.toLowerCase()) {
+        showError("You can not vote for yourself");
+        return;
+    }
 
     const txRecord = new TxRecordHandler(transactionRecordTmp.cloneNode(true));
     txRecord.setTitle(`${currentAccount} voted for ${address}`);
@@ -126,11 +138,15 @@ async function vote(e) {
             txRecord.setPendingStatus(transactionLoadingTmp);
 
             // Add tx to tx list
-            $('.transactions__list').prepend(txRecord.html);
+            $('#transactions-list').prepend(txRecord.html);
         })
-        .once('error', console.error)
+        .catch(error => {
+            handleError(error);
+            txRecord.setFailedStatus(redCrossTmp);
+        })
         .then(receipt => {
             txRecord.setSuccessStatus(checkSignTmp);
+            setVotedStatus();
             getCandidates();
         });
 }
@@ -145,10 +161,14 @@ async function getCandidates() {
 
             candidateRow.dataset.address = candidate.addr;
 
-            candidateRow.querySelector('.candidate__address').innerText = `Адрес: ${candidate.addr}`;
-            candidateRow.querySelector('.candidate__votes-count').innerText = `Голосов: ${candidate.votes}`;
+            candidateRow.querySelector('.candidate__address').innerText = `Address: ${candidate.addr}`;
+            candidateRow.querySelector('.candidate__votes-count').innerText = `Votes: ${candidate.votes}`;
 
-            candidateRow.querySelector('button').addEventListener('click', vote);
+            if (candidate.addr.toLowerCase() === currentAccount.toLowerCase()) {
+                candidateRow.querySelector('button').remove();
+            } else {
+                candidateRow.querySelector('button').addEventListener('click', vote);
+            }
 
             candidatesList.appendChild(candidateRow);
         }
@@ -161,14 +181,60 @@ async function setParticipatingStatus() {
     if (instance && currentAccount) {
         const isCandidate = await instance.isCandidate(currentAccount);
         if (isCandidate) {
-            $('#participating-status').innerText = "Вы являетесь кандидатом";
+            $('#participating-status').innerText = "You are a candidate";
             $('#participate-btn').disabled = true;
             // get votes count
         } else {
-            $('#participating-status').innerText = "Вы не являетесь кандидатом";
+            $('#participating-status').innerText = "You are not a candidate";
             $('#participate-btn').disabled = false;
         }
     }
+}
+
+async function setVotedStatus() {
+    const isVoted = await instance.voted(currentAccount, { from: currentAccount });
+    const statusEl = $('#voted');
+    if (isVoted) {
+        statusEl.innerText = 'You have already voted';
+
+        // disable voting buttons
+        document.querySelectorAll('.candidate__vote-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+    } else {
+        statusEl.innerText = 'You have not voted yet';
+    }
+}
+
+function handleError(error) {
+    // User denied the tx
+    if (error.code === 4001) {
+        // ну ок че
+        console.log('User denied the transaction');
+    }
+    // Internal error (possible 'require()' failed)
+    else if (error.code === -32603) {
+        const reason = getErrorReason(error);
+        if (reason) {
+            showError(reason);
+        } else showError('Unknown internal fail');
+    } else {
+        console.error(error);
+        showError('Something went wrong');
+    }
+}
+
+function getErrorReason(error) {
+    const data = error.data.data;
+
+    if(data) {
+        const someHex = Object.keys(data)[0];
+        if(someHex) {
+            return data[someHex].reason;
+        }
+    }
+
+    return null;
 }
 
 // Provider event handlers
@@ -182,10 +248,8 @@ function handleDisconnect() {
 }
 
 function handleAccountsChanged(accounts) {
-    console.log(accounts);
-
     if (accounts.length === 0) {
-        $('#connection-status').innerText = "Вы не подключены к MetaMask";
+        $('#connection-status').innerText = "You are not connected to MetaMask";
         $('#account').innerText = '';
         $('#chain').innerText = '';
         $('#connect-btn').disabled = false;
@@ -193,23 +257,46 @@ function handleAccountsChanged(accounts) {
     } else if (accounts[0] !== currentAccount) {
         currentAccount = accounts[0];
 
-        $('#connection-status').innerText = "Вы подключены к MetaMask";
-        $('#account').innerText = `Адрес: ${currentAccount}`;
+        $('#connection-status').innerText = "You are connected to MetaMask";
+        $('#account').innerText = `Address: ${currentAccount}`;
         $('#connect-btn').disabled = true;
 
         $('.participating').classList.remove('visually-hidden');
+        getCandidates();
         setParticipatingStatus();
+        setVotedStatus();
     }
 }
 
 function handleChainChanged(chainId) {
-    console.log(chainId);
-
     if(currentAccount) {
         $('#chain').innerText = `ChainId: ${chainId}`;
     }
 }
 
 function handleProviderMessage(msg) {
+    console.log('Provider message');
     console.log(msg);
+}
+
+// Additional functions
+
+function showError(errorText) {
+    const errorRecord = errorRecordTmp.cloneNode(true);
+
+    errorRecord.querySelector('.error__msg').innerText = errorText;
+    $('.errors').prepend(errorRecord);
+}
+
+function showEvent(event) {
+    const eventRecord = eventTmp.cloneNode(true);
+    let args = '';
+
+    eventRecord.querySelector('.event__name').innerText = event.event;
+    Object.entries(event.args).forEach(entry => {
+        args += entry[0] + ': ' + entry[1] + '\n';
+    })
+    eventRecord.querySelector('.event__data').innerText = args;
+
+    $('#events-list').prepend(eventRecord);
 }
