@@ -10502,6 +10502,13 @@ module.exports = class TxRecordHandler {
 // how to get the reason from require???
 // -32000 - -32099 Reserved for implementation-defined errors
 // here I can find the reason
+const networks = {
+    '0x1': 'Ethereum MainNet',
+    '0x3': 'Ropsten TestNet',
+    '0x4': 'Rinkeby TestNet',
+    '0x5': 'Goerli TestNet',
+    '0x539': 'Ganache'
+}
 
 const TxRecordHandler = require('./TxRecordHandler.js');
 
@@ -10514,6 +10521,7 @@ const transactionRecordTmp = $('#transaction-record').content.firstElementChild;
 const errorRecordTmp = $('#error-tmp').content.firstElementChild;
 const redCrossTmp = $('#red-cross-tmp').content.firstElementChild;
 const eventTmp = $('#event-tmp').content.firstElementChild;
+const accountRecordTmp = $('#account-record-tmp').content.firstElementChild;
 
 // Contract data
 const contract = {
@@ -10526,25 +10534,29 @@ let instance = null;
 // Accounts data
 let currentAccount = null;
 
+let provider;
 detectEthereumProvider()
-    .then(provider => {
+    .then(result => {
+        provider = result;
         if (provider && provider.isMetaMask) {
             //provider.on('connect', handleConnect);
             //provider.on('disconnect', handleDisconnect);
             provider.on('accountsChanged', handleAccountsChanged);
             provider.on('chainChanged', handleChainChanged);
             //provider.on('message', handleProviderMessage);
-            $('#connect-btn').addEventListener('click', connect);
-
             Voting.setProvider(provider);
 
-            startApp();
+            void onMetaMaskDetected();
+            void startApp();
         } else {
             console.log('Please install MetaMask!');
         }
-    })
+    });
 
 async function startApp() {
+    // Check for network connection
+    checkNetworkConnection();
+
     // Get the Voting contract instance
     instance = await Voting.at(contract.address);
 
@@ -10558,18 +10570,23 @@ async function startApp() {
     getCandidates();
 
     // Check for connection
-    checkConnection();
+    checkAccountsAccess();
 }
 
 // Provider connection
 
-function checkConnection() {
+async function checkNetworkConnection() {
+    const chainId = await getChainId();
+    handleChainChanged(chainId);
+}
+
+function checkAccountsAccess() {
     ethereum
         .request({ method: 'eth_accounts' })
         .then(handleAccountsChanged)
         .catch(console.error);
 
-    getChain();
+    updateNetworkInfo();
 }
 
 function connect() {
@@ -10584,12 +10601,19 @@ function connect() {
             }
         });
 
-    getChain();
+    updateNetworkInfo();
 }
 
-function getChain() {
-    ethereum
-        .request({ method: 'eth_chainId'})
+function getChainId() {
+    return ethereum.request({ method: 'eth_chainId'});
+}
+
+function setNetworkInfo(chainId) {
+    handleChainChanged(chainId);
+}
+
+function updateNetworkInfo() {
+    getChainId()
         .then(handleChainChanged)
         .catch(console.error);
 }
@@ -10746,29 +10770,49 @@ function handleDisconnect() {
 }
 
 function handleAccountsChanged(accounts) {
+    $('.accounts-table').innerHTML = '';
     if (accounts.length === 0) {
-        $('#connection-status').innerText = "You are not connected to MetaMask";
-        $('#account').innerText = '';
-        $('#chain').innerText = '';
-        $('#connect-btn').disabled = false;
-        $('.participating').classList.add('visually-hidden');
+        setBulbColor('accounts', 'red');
+        $('.requesting__row').classList.remove('visually-hidden');
+        // Place 'enable accounts' btn
     } else if (accounts[0] !== currentAccount) {
+        $('.requesting__row').classList.add('visually-hidden');
+        setBulbColor('accounts', 'green');
         currentAccount = accounts[0];
 
-        $('#connection-status').innerText = "You are connected to MetaMask";
-        $('#account').innerText = `Address: ${currentAccount}`;
-        $('#connect-btn').disabled = true;
-
-        $('.participating').classList.remove('visually-hidden');
-        getCandidates();
-        setParticipatingStatus();
-        setVotedStatus();
+        accounts.forEach(async address => {
+            const accountRecord = accountRecordTmp.cloneNode(true);
+            const addressElement = accountRecord.querySelector('.accounts-table__address');
+            const balanceElement = accountRecord.querySelector('.accounts-table__balance');
+            addressElement.firstElementChild.innerText = address;
+            balanceElement.firstElementChild.innerText = await provider.request({
+                method: 'eth_getBalance',
+                params: [address]
+            });
+            if (currentAccount.toLowerCase() === address.toLowerCase()) {
+                addressElement.classList.add('bold');
+                balanceElement.classList.add('bold');
+                $('.accounts-table').prepend(accountRecord);
+            } else {
+                $('.accounts-table').appendChild(accountRecord);
+            }
+        });
     }
 }
 
 function handleChainChanged(chainId) {
-    if(currentAccount) {
-        $('#chain').innerText = `ChainId: ${chainId}`;
+    const name = networks[chainId];
+    $('#network').innerText = name ? `Selected network: ${name}` : '';
+    $('#chain').innerText = `ChainID: ${chainId}`;
+
+    if (provider.isConnected()) {
+        setBulbColor('network', 'green');
+        $('#rpc-connection').innerText = "JSON-RPC connection is established";
+        // Enable all other actions
+    } else {
+        setBulbColor('network', 'red');
+        $('#rpc-connection').innerText = 'No JSON-RPC connection';
+        // Block all other actions
     }
 }
 
@@ -10797,5 +10841,18 @@ function showEvent(event) {
     eventRecord.querySelector('.event__data').innerText = args;
 
     $('#events-list').prepend(eventRecord);
+}
+
+async function onMetaMaskDetected() {
+    setBulbColor('provider', 'green');
+    $('#metamask-availability').innerText = "MetaMask is installed";
+    const version = await provider.request({ method: 'web3_clientVersion' });
+    const versionSlice = version.slice(version.indexOf('/v') + 2) || 'unknown';
+    $('#metamask-version').innerText = 'Version: ' + versionSlice;
+}
+
+function setBulbColor(name, color) {
+    const bulb = $(`#${name}-lightbulb`);
+    bulb.style.backgroundColor = color;
 }
 },{"../../build/contracts/Voting.json":1,"./TxRecordHandler.js":2}]},{},[3]);

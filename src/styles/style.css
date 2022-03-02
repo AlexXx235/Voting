@@ -26,6 +26,10 @@ button {
     padding: 2px;
 }
 
+.bold {
+    font-weight: 700;
+}
+
 .container {
     width: 100%;
     height: 100%;
@@ -35,6 +39,7 @@ button {
 
 .content {
     width: 860px;
+    padding: 40px 0 0 0;
 
     display: flex;
     flex-direction: column;
@@ -104,6 +109,7 @@ button {
 
 .dropdown {
     width: 100%;
+    margin: 0 0 20px 0;
 
     display: flex;
     flex-direction: column;
@@ -203,4 +209,94 @@ button {
 
 #red-cross-2 {
     transform: rotate(-45deg);
+}
+
+.status-card {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 20px 0;
+}
+
+.status-card__title {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 22px 7px 20px;
+
+    background-color: #F5F5F5;
+}
+
+.status-card__title p {
+
+}
+
+.status-card__body {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    flex: 1 0;
+
+    background-color: #FCFCFC;
+    border: 3px solid #F5F5F5;
+    border-top: none;
+}
+
+.status-card__row {
+    padding: 5px 15px;
+}
+
+.accounts-table {
+    display: flex;
+    flex-direction: column;
+}
+
+.accounts-table__row {
+    display: grid;
+    grid-template-columns: 75% 25%;
+}
+
+.accounts-table__address {
+    padding: 5px 0 5px 15px;
+    border-top: 2px solid #F5F5F5;
+}
+
+.accounts-table__balance {
+    display: flex;
+    justify-content: center;
+    padding: 5px 0;
+    border-left: 2px solid #F5F5F5;
+    border-top: 2px solid #F5F5F5;
+}
+
+.accounts-table__row:first-child .accounts-table__address,
+.accounts-table__row:first-child .accounts-table__balance {
+    border-top: none;
+}
+
+#provider-card, #network-card {
+    width: 48%;
+}
+
+.two-cards {
+    display: flex;
+    justify-content: space-between;
+}
+
+.requesting__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    padding: 5px 15px;
+}
+
+.requesting__row button {
+    justify-self: center;
+}
+
+.circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red;
 }

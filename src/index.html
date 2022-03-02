@@ -17,6 +17,43 @@
         <div class="errors">
 
         </div>
+        <div class="two-cards">
+            <div id="provider-card" class="status-card">
+                <div class="status-card__title">
+                    <p>Provider Info</p>
+                    <div id="provider-lightbulb" class="circle"></div>
+                </div>
+                <div class="status-card__body">
+                    <p id="metamask-availability" class="status-card__row">MetaMask is not detected</p>
+                    <p id="metamask-version" class="status-card__row"></p>
+                </div>
+            </div>
+            <div id="network-card" class="status-card">
+                <div class="status-card__title">
+                    <p>Network Connection</p>
+                    <div id="network-lightbulb" class="circle"></div>
+                </div>
+                <div class="status-card__body">
+                    <p id="rpc-connection" class="status-card__row">No JSON-RPC connection</p>
+                    <p id="network" class="status-card__row"></p>
+                    <p id="chain" class="status-card__row"></p>
+                </div>
+            </div>
+        </div>
+        <div class="status-card">
+            <div class="status-card__title">
+                <p>Accounts access</p>
+                <div id="accounts-lightbulb" class="circle"></div>
+            </div>
+            <div class="status-card__body">
+                <div class="requesting__row">
+                    <p>No access to your accounts</p>
+                    <button>Enable accounts</button>
+                </div>
+                <div class="accounts-table">
+                </div>
+            </div>
+        </div>
         <div class="dropdown">
             <div class="dropdown__header">
                 <div class="right-triangle"></div>
@@ -34,14 +71,6 @@
             <div id="events-list" class="dropdown__list">
 
             </div>
-        </div>
-        <div class="connection">
-            <div class="connection__status">
-                <p id="connection-status">You are not connected to MetaMask</p>
-                <p id="account"></p>
-                <p id="chain"></p>
-            </div>
-            <button id="connect-btn" class="connection__btn" disabled>Connect</button>
         </div>
         <div class="participating visually-hidden">
             <div class="participating__status">
@@ -111,6 +140,17 @@
     <div class="event">
         <p class="event__name"></p>
         <p class="event__data"></p>
+    </div>
+</template>
+
+<template id="account-record-tmp">
+    <div class="accounts-table__row">
+        <div class="accounts-table__address">
+            <p></p>
+        </div>
+        <div class="accounts-table__balance">
+            <p></p>
+        </div>
     </div>
 </template>
 
