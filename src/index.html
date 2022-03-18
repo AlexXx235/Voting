@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./styles/style.css">
     <link rel="stylesheet" href="./styles/animations.css">
     <script type="text/javascript" src="./dist/truffle-contract.min.js"></script>
-    <script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script>
+    <script type="text/javascript" src="./dist/detect-provider.min.js"></script>
     <title>Voting</title>
 </head>
 <body>
@@ -21,7 +21,7 @@
             <div id="provider-card" class="status-card">
                 <div class="status-card__title">
                     <p>Provider Info</p>
-                    <div id="provider-lightbulb" class="circle"></div>
+                    <div id="provider-lightbulb" class="bulb"></div>
                 </div>
                 <div class="status-card__body">
                     <p id="metamask-availability" class="status-card__row">MetaMask is not detected</p>
@@ -31,7 +31,7 @@
             <div id="network-card" class="status-card">
                 <div class="status-card__title">
                     <p>Network Connection</p>
-                    <div id="network-lightbulb" class="circle"></div>
+                    <div id="network-lightbulb" class="bulb"></div>
                 </div>
                 <div class="status-card__body">
                     <p id="rpc-connection" class="status-card__row">No JSON-RPC connection</p>
@@ -40,10 +40,10 @@
                 </div>
             </div>
         </div>
-        <div class="status-card">
+        <div id="accounts-card" class="status-card">
             <div class="status-card__title">
                 <p>Accounts access</p>
-                <div id="accounts-lightbulb" class="circle"></div>
+                <div id="accounts-lightbulb" class="bulb"></div>
             </div>
             <div class="status-card__body">
                 <div class="requesting__row">
