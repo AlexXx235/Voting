@@ -60,13 +60,17 @@ module.exports = class UI {
         UI.instance.networkCard.disable();
     }
 
-    onAccountsOn() {
+    onAccountsOn(accounts) {
+        console.log('onAccountsOn');
         UI.instance.accountsCard.enable();
+        UI.instance.accountsCard.hideRequestingRow();
+        UI.instance.accountsCard.fillAccountsTable(accounts);
     }
 
     onAccountsOff() {
         console.log('onAccountsOff');
         UI.instance.accountsCard.disable();
+        UI.instance.accountsCard.showRequestingRow();
     }
 
     onReady() {

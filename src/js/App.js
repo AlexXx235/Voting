@@ -11,22 +11,30 @@ module.exports = class App {
     }
 
     async start() {
-        this.provider.on('connect', this.state.onConnect);
-        this.provider.on('disconnect', this.state.onDisconnect);
-        this.provider.on('chainChanged', this.state.onChainChanged);
-        this.provider.on('accountsChanged', this.state.onAccountsChanged);
+        this.provider.on('connect', this.state.onConnect.bind(this.state));
+        this.provider.on('disconnect', this.state.onDisconnect.bind(this.state));
+        this.provider.on('chainChanged', this.state.onChainChanged.bind(this.state));
+        this.provider.on('accountsChanged', this.state.onAccountsChanged.bind(this.state));
 
         const version = await this.provider.request({ method: 'web3_clientVersion' });
         const versionSlice = version.slice(version.indexOf('/v') + 2) || 'unknown';
         this.trigger('providerOn', versionSlice);
-        await this.checkNetworkConnection();
+        this.checkNetworkStatus();
         await this.checkAccountsAccess();
+    }
+
+    checkNetworkStatus() {
+        void this.checkNetworkConnection();
+        void this.checkCurrentNetwork();
     }
 
     async checkNetworkConnection() {
         if (this.provider.isConnected()) {
             this.state.onConnect();
         }
+    }
+
+    async checkCurrentNetwork() {
         const chainId = await this.getCurrentChainId();
         this.state.onChainChanged(chainId);
     }

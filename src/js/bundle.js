@@ -76,22 +76,30 @@ module.exports = class App {
     }
 
     async start() {
-        this.provider.on('connect', this.state.onConnect);
-        this.provider.on('disconnect', this.state.onDisconnect);
-        this.provider.on('chainChanged', this.state.onChainChanged);
-        this.provider.on('accountsChanged', this.state.onAccountsChanged);
+        this.provider.on('connect', this.state.onConnect.bind(this.state));
+        this.provider.on('disconnect', this.state.onDisconnect.bind(this.state));
+        this.provider.on('chainChanged', this.state.onChainChanged.bind(this.state));
+        this.provider.on('accountsChanged', this.state.onAccountsChanged.bind(this.state));
 
         const version = await this.provider.request({ method: 'web3_clientVersion' });
         const versionSlice = version.slice(version.indexOf('/v') + 2) || 'unknown';
         this.trigger('providerOn', versionSlice);
-        await this.checkNetworkConnection();
+        this.checkNetworkStatus();
         await this.checkAccountsAccess();
+    }
+
+    checkNetworkStatus() {
+        void this.checkNetworkConnection();
+        void this.checkCurrentNetwork();
     }
 
     async checkNetworkConnection() {
         if (this.provider.isConnected()) {
             this.state.onConnect();
         }
+    }
+
+    async checkCurrentNetwork() {
         const chainId = await this.getCurrentChainId();
         this.state.onChainChanged(chainId);
     }
@@ -141,8 +149,9 @@ module.exports = class StateSwitch {
     }
 
     onDisconnect() {
-        this.becomeNotReadyIfReady();
+        void this.context.checkCurrentNetwork();
 
+        this.becomeNotReadyIfReady();
         this.state.rpcConnection = false;
         this.context.trigger('disconnect');
         this.context.trigger('networkOff');
@@ -150,11 +159,14 @@ module.exports = class StateSwitch {
 
     onAccountsChanged(accounts) {
         console.log(accounts);
+        console.log(this);
         if (accounts.length === 0) {
             this.becomeNotReadyIfReady();
+            this.currentAccount = null;
             this.state.accountsAccess = false;
             this.context.trigger('accountsOff');
         } else if (accounts[0] !== this.currentAccount) {
+            this.currentAccount = accounts[0];
             this.state.accountsAccess = true;
             this.context.trigger('accountsOn', accounts);
             this.getReadyIfPossible();
@@ -192,16 +204,46 @@ module.exports = class StateSwitch {
     }
 
     allConditionsMet() {
-        Object.values(this.state).forEach(condition => {
+        for (const condition of Object.values(this.state)) {
             if (!condition) return false;
-        });
+        }
         return true;
     }
 }
 },{}],4:[function(require,module,exports){
 const StatusCard = require('./StatusCard.js');
 
-module.exports = class AccountsStatusCard extends StatusCard {}
+module.exports = class AccountsStatusCard extends StatusCard {
+    constructor(html) {
+        super(html);
+        this.table = this.getElement(html, '.accounts-table');
+        this.requestingRow = this.getElement(html, '.accounts-requesting-row');
+    }
+
+    fillAccountsTable(accounts) {
+        this.table.innerHTML = '';
+        const rowTmp = document.getElementById('account-record-tmp').content.firstElementChild;
+        accounts.forEach((account, index) => {
+            const row = rowTmp.cloneNode(true);
+            row.querySelector('.accounts-table__address p').innerText = account;
+            row.querySelector('.accounts-table__balance p').innerText = 'IDK';
+            if (index === 0) {
+                row.querySelector('.accounts-table__address p').classList.add('bold');
+                row.querySelector('.accounts-table__balance p').classList.add('bold');
+            }
+            this.table.prepend(row);
+        })
+    }
+
+    showRequestingRow() {
+        this.table.innerHTML = '';
+        this.requestingRow.classList.remove('visually-hidden');
+    }
+
+    hideRequestingRow() {
+        this.requestingRow.classList.add('visually-hidden')
+    }
+}
 },{"./StatusCard.js":7}],5:[function(require,module,exports){
 const StatusCard = require('./StatusCard.js');
 
@@ -346,13 +388,17 @@ module.exports = class UI {
         UI.instance.networkCard.disable();
     }
 
-    onAccountsOn() {
+    onAccountsOn(accounts) {
+        console.log('onAccountsOn');
         UI.instance.accountsCard.enable();
+        UI.instance.accountsCard.hideRequestingRow();
+        UI.instance.accountsCard.fillAccountsTable(accounts);
     }
 
     onAccountsOff() {
         console.log('onAccountsOff');
         UI.instance.accountsCard.disable();
+        UI.instance.accountsCard.showRequestingRow();
     }
 
     onReady() {
@@ -396,19 +442,37 @@ module.exports = {
 const App = require('./App.js');
 const UI = require('./UI.js');
 
+let provider;
+let app;
+let ui;
+
 const detectMetaMask = require('@metamask/detect-provider');
 detectMetaMask()
-    .then(provider => {
+    .then(receivedProvider => {
+        provider = receivedProvider;
        if (provider && provider.isMetaMask) {
-           const app = new App(provider);
-           const ui = new UI(app);
+           app = new App(provider);
+           ui = new UI(app);
            void app.start();
        } else {
            window.alert('Please install MetaMask and reload the page!');
        }
     })
     .catch(error => {
-        console.log("Provider detection failed");
+        console.log("App start failed");
         console.error(error);
     });
+
+document.querySelector('.accounts-requesting-row__btn').addEventListener('click', () => {
+    provider
+        .request({ method: 'eth_requestAccounts'})
+        .then(app.state.onAccountsChanged.bind(app.state))
+        .catch((err) => {
+            if (err.code === 4001) {
+                console.log('Please connect to MetaMask.');
+            } else {
+                console.error(err);
+            }
+        });
+})
 },{"./App.js":2,"./UI.js":8,"@metamask/detect-provider":1}]},{},[10]);

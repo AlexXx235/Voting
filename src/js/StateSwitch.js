@@ -21,8 +21,9 @@ module.exports = class StateSwitch {
     }
 
     onDisconnect() {
-        this.becomeNotReadyIfReady();
+        void this.context.checkCurrentNetwork();
 
+        this.becomeNotReadyIfReady();
         this.state.rpcConnection = false;
         this.context.trigger('disconnect');
         this.context.trigger('networkOff');
@@ -30,11 +31,14 @@ module.exports = class StateSwitch {
 
     onAccountsChanged(accounts) {
         console.log(accounts);
+        console.log(this);
         if (accounts.length === 0) {
             this.becomeNotReadyIfReady();
+            this.currentAccount = null;
             this.state.accountsAccess = false;
             this.context.trigger('accountsOff');
         } else if (accounts[0] !== this.currentAccount) {
+            this.currentAccount = accounts[0];
             this.state.accountsAccess = true;
             this.context.trigger('accountsOn', accounts);
             this.getReadyIfPossible();
@@ -72,9 +76,9 @@ module.exports = class StateSwitch {
     }
 
     allConditionsMet() {
-        Object.values(this.state).forEach(condition => {
+        for (const condition of Object.values(this.state)) {
             if (!condition) return false;
-        });
+        }
         return true;
     }
 }

@@ -42,13 +42,13 @@
         </div>
         <div id="accounts-card" class="status-card">
             <div class="status-card__title">
-                <p>Accounts access</p>
+                <p>Accessed accounts</p>
                 <div id="accounts-lightbulb" class="bulb"></div>
             </div>
             <div class="status-card__body">
-                <div class="requesting__row">
+                <div class="accounts-requesting-row">
                     <p>No access to your accounts</p>
-                    <button>Enable accounts</button>
+                    <button class="accounts-requesting-row__btn">Enable accounts</button>
                 </div>
                 <div class="accounts-table">
                 </div>
@@ -72,18 +72,32 @@
 
             </div>
         </div>
-        <div class="participating visually-hidden">
-            <div class="participating__status">
-                <p id="participating-status">You are not a candidate</p>
-                <p id="votes"></p>
+        <div class="app">
+            <div class="app__title">
+                <p>Voting DApp</p>
             </div>
-            <button id="participate-btn" class="participating__btn" disabled>Join</button>
-        </div>
-        <div class="voting-status">
-            <p id="voted" class="voting-status__voted"></p>
-        </div>
-        <div class="candidates-list">
-
+            <div class="user-status">
+                <div class="user-participating-status">
+                    <p id="participating-status" class="user-participating-status__text">You are not a candidate</p>
+                    <p id="votes" class="user-participating-status__text">Votes: 2</p>
+                    <button id="join-btn" class="user-participating-status__btn">Join</button>
+                </div>
+                <div class="user-voted-status">
+                    <p class="user-voted-status__text">You have already voted</p>
+                </div>
+            </div>
+            <div class="candidates-list">
+                <div class="candidates-list__title">
+                    <p>Candidates</p>
+                </div>
+                <div class="candidate">
+                    <p class="candidate__address">0x18af16F0D2F48C62A52Ed0D3ECE72dA9E935aF05</p>
+                    <div class="candidate__voting">
+                        <p class="candidate__votes">Votes: 2</p>
+                        <button class="candidate__vote-btn">Vote</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -155,7 +169,6 @@
 </template>
 
 <script src="js/front.js"></script>
-<!--<script type="module" src="js/TxRecordHandler.js"></script>-->
 <script type="module" src="js/bundle.js"></script>
 </body>
 </html>

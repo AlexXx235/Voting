@@ -11,8 +11,4 @@ module.exports = class VotingContract {
     setProvider(provider) {
         this.contract.setProvider(provider);
     }
-
-    getInstance() {
-
-    }
 }
