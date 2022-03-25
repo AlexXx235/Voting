@@ -13,10 +13,8 @@ module.exports = class AccountsStatusCard extends StatusCard {
         accounts.forEach((account, index) => {
             const row = rowTmp.cloneNode(true);
             row.querySelector('.accounts-table__address p').innerText = account;
-            row.querySelector('.accounts-table__balance p').innerText = 'IDK';
             if (index === 0) {
                 row.querySelector('.accounts-table__address p').classList.add('bold');
-                row.querySelector('.accounts-table__balance p').classList.add('bold');
             }
             this.table.prepend(row);
         })

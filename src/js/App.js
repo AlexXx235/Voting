@@ -1,13 +1,19 @@
-// Exports App class after assigning mixin
-
+const VotingContract = require('./VotingContract.js');
 const StateSwitch = require('./StateSwitch.js');
 const eventEmitter = require('./lib/EventEmitter.js');
 
+
 module.exports = class App {
-    constructor(provider) {
+    constructor(provider, contractData) {
+        this.user = {
+            address: '',
+            isCandidate: false,
+            voted: false
+        };
         this.provider = provider;
-        this.state = new StateSwitch(this, {chainId: '0x3'});
+        this.state = new StateSwitch(this, {chainId: contractData.chainId});
         this.eventEmitter = eventEmitter;
+        this.contract = new VotingContract(this, contractData.abi, contractData.address);
     }
 
     async start() {
@@ -50,6 +56,10 @@ module.exports = class App {
 
     on(eventName, handler) {
         this.eventEmitter.on(eventName, handler);
+    }
+
+    once(eventName, handler) {
+        this.eventEmitter.once(eventName, handler);
     }
 
     off(eventName, handler) {

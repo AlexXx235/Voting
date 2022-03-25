@@ -248,14 +248,30 @@ button {
 .user-participating-status {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px;
 }
+.user-participating-status__votes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.user-participating-status__btn {
+  margin-top: 12px;
+  width: 100%;
+}
+
 .user-voted-status {
   padding: 10px;
 }
 .candidates-list__title {
   padding: 7px 22px 7px 20px;
   background-color: #f5f5f5;
+}
+.candidates-list__body {
+  display: flex;
+  flex-direction: column;
 }
 
 .candidate {
@@ -272,9 +288,19 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
 }
 .candidate__votes {
   margin: 0 0 8px 0;
+}
+.event {
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+  background-color: #FCFCFC;
+}
+.event__name {
+  margin-bottom: 10px;
 }
 
 /*# sourceMappingURL=style.css.map */

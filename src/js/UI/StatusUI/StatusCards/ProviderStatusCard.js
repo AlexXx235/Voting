@@ -10,12 +10,10 @@ module.exports = class ProviderStatusCard extends StatusCard {
     setDetectedStatus(version) {
         this.availability.innerText = 'MetaMask installed';
         this.version.innerText = `Version: ${version}`;
-        //this.enable();
     }
 
     setNotDetectedStatus() {
         this.availability.innerText = 'MetaMask is not detected';
         this.version.innerText = '';
-        //this.disable();
     }
 }

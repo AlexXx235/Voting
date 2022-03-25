@@ -1,5 +1,12 @@
 const StatusCard = require('./StatusCard.js');
 
+const networks = {
+    '0x1': 'Main',
+    '0x3': 'Ropsten',
+    '0x4': 'Rinkeby',
+    '0x539': 'Ganache'
+};
+
 module.exports = class NetworkStatusCard extends StatusCard {
     constructor(html) {
         super(html);
@@ -17,12 +24,12 @@ module.exports = class NetworkStatusCard extends StatusCard {
     }
 
     setCorrectNetworkStatus(chainId) {
-        this.network.innerText = 'Correct';
-        this.chain.innerText = chainId;
+        this.network.innerText = `${networks[chainId] || 'Unknown Network'} (Correct network)`;
+        this.chain.innerText = `ChainId: ${chainId}`;
     }
 
     setWrongNetworkStatus(chainId) {
-        this.network.innerText = 'Wrong';
-        this.chain.innerText = chainId;
+        this.network.innerText = `${networks[chainId] || 'Unknown Network'} (Wrong network)`;
+        this.chain.innerText = `ChainId: ${chainId}`;
     }
 }

@@ -1,3 +1,7 @@
+const txLoadingTmp = document.getElementById('transaction-loading').content.firstElementChild;
+const txSuccessTmp = document.getElementById('check-sign').content.firstElementChild;
+const txFailTmp = document.getElementById('error-tmp').content.firstElementChild;
+
 module.exports = class TxRecordHandler {
     constructor(html) {
         this.html = html;
@@ -11,7 +15,7 @@ module.exports = class TxRecordHandler {
         this.html.querySelector('.transaction__hash').innerText = `Hash: ${hash}`;
     }
 
-    setPendingStatus(txLoadingTmp) {
+    setPendingStatus() {
         this.html.querySelector('.transaction__status-img').innerHTML = '';
         this.html.querySelector('.transaction__status-img').appendChild(
             txLoadingTmp.cloneNode(true)
@@ -21,12 +25,12 @@ module.exports = class TxRecordHandler {
 
         this.count = 0;
         this.timer = setInterval(() =>{
-            this.html.querySelector('.transaction__timer').innerText = this.count;
+            this.html.querySelector('.transaction__timer').innerText = this.count + ' sec';
             ++this.count;
         }, 1000);
     }
 
-    setSuccessStatus(txSuccessTmp) {
+    setSuccessStatus() {
         this.html.querySelector('.transaction__status-img').innerHTML = ''
         this.html.querySelector('.transaction__status-img').appendChild(
             txSuccessTmp.cloneNode(true)
@@ -37,7 +41,7 @@ module.exports = class TxRecordHandler {
         clearInterval(this.timer);
     }
 
-    setFailedStatus(txFailTmp) {
+    setFailedStatus() {
         this.html.querySelector('.transaction__status-img').innerHTML = ''
         this.html.querySelector('.transaction__status-img').appendChild(
             txFailTmp.cloneNode(true)

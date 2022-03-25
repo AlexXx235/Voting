@@ -72,30 +72,28 @@
 
             </div>
         </div>
-        <div class="app">
+        <div class="app visually-hidden">
             <div class="app__title">
                 <p>Voting DApp</p>
             </div>
             <div class="user-status">
                 <div class="user-participating-status">
                     <p id="participating-status" class="user-participating-status__text">You are not a candidate</p>
-                    <p id="votes" class="user-participating-status__text">Votes: 2</p>
-                    <button id="join-btn" class="user-participating-status__btn">Join</button>
+                    <div class="user-participating-status__votes">
+                        <p id="votes" class="user-participating-status__text"></p>
+                        <button id="join-btn" class="user-participating-status__btn" disabled>Join</button>
+                    </div>
                 </div>
                 <div class="user-voted-status">
-                    <p class="user-voted-status__text">You have already voted</p>
+                    <p id="voted" class="user-voted-status__text">You have not voted yet</p>
                 </div>
             </div>
             <div class="candidates-list">
                 <div class="candidates-list__title">
                     <p>Candidates</p>
                 </div>
-                <div class="candidate">
-                    <p class="candidate__address">0x18af16F0D2F48C62A52Ed0D3ECE72dA9E935aF05</p>
-                    <div class="candidate__voting">
-                        <p class="candidate__votes">Votes: 2</p>
-                        <button class="candidate__vote-btn">Vote</button>
-                    </div>
+                <div class="candidates-list__body">
+
                 </div>
             </div>
         </div>
@@ -104,18 +102,15 @@
 
 <template id="candidate-template">
     <div class="candidate">
-        <div class="candidate__info">
-            <p class="candidate__name"></p>
-            <p class="candidate__address"></p>
-        </div>
-        <div class="candidate__votes">
-            <p class="candidate__votes-count"></p>
-            <button class="candidate__vote-btn">Vote</button>
+        <p class="candidate__address"></p>
+        <div class="candidate__voting">
+            <p class="candidate__votes"></p>
+            <button class="candidate__vote-btn" disabled>Vote</button>
         </div>
     </div>
 </template>
 
-<template id="transaction-record">
+<template id="transaction-record-tmp">
     <div class="transaction">
         <div class="transaction__status-img"></div>
         <div class="transaction__status-info">
@@ -160,9 +155,6 @@
 <template id="account-record-tmp">
     <div class="accounts-table__row">
         <div class="accounts-table__address">
-            <p></p>
-        </div>
-        <div class="accounts-table__balance">
             <p></p>
         </div>
     </div>
