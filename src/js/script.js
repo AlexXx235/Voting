@@ -5,7 +5,7 @@ const StatusUI = require('./UI/StatusUI/StatusUI.js');
 const VotingUI = require('./UI/ContractUI/VotingUI.js');
 const contractData = {
     abi: require('../../build/contracts/Voting.json').abi,
-    address: '0x91826897B8e53ed82eCa2697BDF2F2e0BB21F46c',
+    address: '0xE7140F8CC3BDd4582FfdFc240F28A93cAC283ce1',
     chainId: '0x539' // Ganache
 }
 
@@ -14,8 +14,6 @@ let app;
 let statusUI;
 let votingUI;
 let candidatesListObserver;
-
-// 0x977c82Ac02494FEad5866304d06C69F295C626DA
 
 const detectMetaMask = require('@metamask/detect-provider');
 detectMetaMask()

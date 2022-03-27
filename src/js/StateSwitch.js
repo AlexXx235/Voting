@@ -29,13 +29,13 @@ module.exports = class StateSwitch {
         this.app.trigger('networkOff');
     }
 
-    onAccountsChanged(accounts = []) {
+    onAccountsChanged(accounts = ['']) {
         if (accounts.length === 0) {
             this.becomeNotReadyIfReady();
             this.user.address = null;
             this.state.accountsAccess = false;
             this.app.trigger('accountsOff');
-        } else if (accounts[0].toLowerCase() !== this.user.address.toLowerCase()) {
+        } else if (this.user.address === null || accounts[0].toLowerCase() !== this.user.address.toLowerCase()) {
             this.user.address = accounts[0];
             this.state.accountsAccess = true;
             this.app.trigger('accountsOn', accounts);

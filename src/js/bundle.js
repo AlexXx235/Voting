@@ -10381,12 +10381,12 @@ module.exports={
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x91826897B8e53ed82eCa2697BDF2F2e0BB21F46c",
-      "transactionHash": "0x01767b635c2f4be87f60c10e8934ce1171314e4671f764bc2433802ba343804f"
+      "address": "0xE7140F8CC3BDd4582FfdFc240F28A93cAC283ce1",
+      "transactionHash": "0xc846af0d160e91f987d31c1d0c07e79a18c9e4a51568b6378b986aa05ba5902e"
     }
   },
   "schemaVersion": "3.4.4",
-  "updatedAt": "2022-03-25T11:30:37.973Z",
+  "updatedAt": "2022-03-27T07:41:01.330Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
@@ -39908,13 +39908,13 @@ module.exports = class StateSwitch {
         this.app.trigger('networkOff');
     }
 
-    onAccountsChanged(accounts = []) {
+    onAccountsChanged(accounts = ['']) {
         if (accounts.length === 0) {
             this.becomeNotReadyIfReady();
             this.user.address = null;
             this.state.accountsAccess = false;
             this.app.trigger('accountsOff');
-        } else if (accounts[0].toLowerCase() !== this.user.address.toLowerCase()) {
+        } else if (this.user.address === null || accounts[0].toLowerCase() !== this.user.address.toLowerCase()) {
             this.user.address = accounts[0];
             this.state.accountsAccess = true;
             this.app.trigger('accountsOn', accounts);
@@ -40587,7 +40587,7 @@ const StatusUI = require('./UI/StatusUI/StatusUI.js');
 const VotingUI = require('./UI/ContractUI/VotingUI.js');
 const contractData = {
     abi: require('../../build/contracts/Voting.json').abi,
-    address: '0x91826897B8e53ed82eCa2697BDF2F2e0BB21F46c',
+    address: '0xE7140F8CC3BDd4582FfdFc240F28A93cAC283ce1',
     chainId: '0x539' // Ganache
 }
 
@@ -40596,8 +40596,6 @@ let app;
 let statusUI;
 let votingUI;
 let candidatesListObserver;
-
-// 0x977c82Ac02494FEad5866304d06C69F295C626DA
 
 const detectMetaMask = require('@metamask/detect-provider');
 detectMetaMask()
